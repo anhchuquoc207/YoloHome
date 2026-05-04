@@ -1,11 +1,14 @@
+import { OnModuleInit } from '@nestjs/common';
 import { CameraRepository } from '../repositories/camera.repository';
 import { DevicesRepository } from '../../devices/repositories/devices.repository';
 import type { CameraCommandDto } from '../dto/camera-command.dto';
 import type { CameraRecognizeDto } from '../dto/camera-recognize.dto';
-export declare class CameraService {
+export declare class CameraService implements OnModuleInit {
     private readonly repository;
     private readonly devicesRepository;
+    private mqttClient;
     constructor(repository: CameraRepository, devicesRepository: DevicesRepository);
+    onModuleInit(): void;
     getLogs(): import("mongoose").Query<(import("mongoose").Document<unknown, {}, import("mongoose").Document<unknown, {}, import("../schemas/camera-log.schema").CameraLog, {}, import("mongoose").DefaultSchemaOptions> & import("../schemas/camera-log.schema").CameraLog & {
         _id: import("mongoose").Types.ObjectId;
     } & {
