@@ -5,6 +5,7 @@ export declare class CameraLog {
     device_id: number | null;
     event: 'camera_on' | 'camera_off' | 'face_detected';
     face_label: string | null;
+    authorized: 0 | 1 | null;
     note: string | null;
     created_at: string;
 }
@@ -45,6 +46,15 @@ export declare const CameraLogSchema: import("mongoose").Schema<CameraLog, impor
         id: string;
     }> | undefined;
     face_label?: import("mongoose").SchemaDefinitionProperty<string | null, CameraLog, import("mongoose").Document<unknown, {}, CameraLog, {
+        id: string;
+    }, import("mongoose").DefaultSchemaOptions> & Omit<CameraLog & {
+        _id: import("mongoose").Types.ObjectId;
+    } & {
+        __v: number;
+    }, "id"> & {
+        id: string;
+    }> | undefined;
+    authorized?: import("mongoose").SchemaDefinitionProperty<0 | 1 | null, CameraLog, import("mongoose").Document<unknown, {}, CameraLog, {
         id: string;
     }, import("mongoose").DefaultSchemaOptions> & Omit<CameraLog & {
         _id: import("mongoose").Types.ObjectId;

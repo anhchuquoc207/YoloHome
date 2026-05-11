@@ -12,21 +12,50 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.LightsService = void 0;
 const common_1 = require("@nestjs/common");
 const lights_repository_1 = require("../repositories/lights.repository");
+const mqtt_service_1 = require("../../mqtt/mqtt.service");
 let LightsService = class LightsService {
-    constructor(repository) {
+    constructor(repository, mqttService) {
         this.repository = repository;
+        this.mqttService = mqttService;
     }
     getCommands() {
         return this.repository.findAll();
     }
     sendCommand(dto) {
-        return this.repository.create(dto.command);
+        const result = this.repository.create(dto.command);
+        if (dto.command === "on") {
+            this.mqttService.publishFeed("V18", "1");
+        }
+        else if (dto.command === "off") {
+            this.mqttService.publishFeed("V18", "0");
+        }
+        return result;
     }
     getRoomSettings() {
         return this.repository.getRoomSettings();
     }
     sendRoomCommand(room, dto) {
-        return this.repository.sendRoomCommand(room, dto.command);
+        const result = this.repository.sendRoomCommand(room, dto.command);
+        const roomName = room.toLowerCase();
+        let feed = "";
+        if (roomName.includes("living")) {
+            feed = "V18";
+        }
+        else if (roomName.includes("bed")) {
+            feed = "V19";
+        }
+        else if (roomName.includes("kitchen")) {
+            feed = "V20";
+        }
+        if (feed) {
+            if (dto.command === "on") {
+                this.mqttService.publishFeed(feed, "1");
+            }
+            else if (dto.command === "off") {
+                this.mqttService.publishFeed(feed, "0");
+            }
+        }
+        return result;
     }
     updateRoomSettings(room, dto) {
         return this.repository.updateRoomSettings(room, dto);
@@ -35,6 +64,7 @@ let LightsService = class LightsService {
 exports.LightsService = LightsService;
 exports.LightsService = LightsService = __decorate([
     (0, common_1.Injectable)(),
-    __metadata("design:paramtypes", [lights_repository_1.LightsRepository])
+    __metadata("design:paramtypes", [lights_repository_1.LightsRepository,
+        mqtt_service_1.MqttService])
 ], LightsService);
 //# sourceMappingURL=lights.service.js.map

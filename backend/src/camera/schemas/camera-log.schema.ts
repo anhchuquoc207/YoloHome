@@ -27,6 +27,9 @@ export class CameraLog {
   @Prop({ type: String, default: null })
   face_label!: string | null
 
+  @Prop({ type: Number, enum: [0, 1], default: null })
+  authorized!: 0 | 1 | null
+
   @Prop({ type: String, default: null })
   note!: string | null
 

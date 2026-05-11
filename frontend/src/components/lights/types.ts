@@ -31,6 +31,4 @@ export interface RoomLightCardProps {
   brightness: number
   colorTemp: ColorTemp
   onToggle: () => void
-  onBrightness: (v: number) => void
-  onColorTemp: (v: ColorTemp) => void
 }

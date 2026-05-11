@@ -7,14 +7,16 @@ export function LightCard() {
   const queryClient = useQueryClient()
   const light = useQuery({ queryKey: ['light'], queryFn: getLight })
   const [localOn, setLocalOn] = useState<boolean | null>(null)
-  const isOn = localOn ?? light.data?.status === 'on'
+  const isOn = localOn ?? light.data?.is_on ?? false
 
   const mutation = useMutation({
     mutationFn: sendLightCommand,
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['light'] })
-      queryClient.invalidateQueries({ queryKey: ['lightCommands'] })
-    },
+    setLocalOn(null)
+    queryClient.invalidateQueries({ queryKey: ['light'] })
+    queryClient.invalidateQueries({ queryKey: ['lightCommands'] })
+    queryClient.invalidateQueries({ queryKey: ['roomSettings'] })
+},
   })
 
   const handleToggle = () => {
@@ -39,7 +41,7 @@ export function LightCard() {
       )}
       <div className="flex items-center justify-between">
         <span className={`text-[19px] font-semibold transition-colors duration-700 ${isOn ? 'text-stone-800' : 'text-white/60'}`}>
-          {light.data?.name ?? 'Living Room Light'}
+          {light.data?.room ? `${light.data.room} Light` : 'Living Room Light'}
         </span>
         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8"
           className={isOn ? 'text-stone-300' : 'text-white/20'}>

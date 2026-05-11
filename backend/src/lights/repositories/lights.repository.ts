@@ -20,16 +20,16 @@ export class LightsRepository implements OnModuleInit {
 
     if (cmdCount === 0) {
       await this.commandModel.insertMany([
-        { device_id: 1, device_name: 'Living Room', command: 'on',  executed: true, executed_at: '2026-04-08T10:00:00', created_at: '2026-04-08T10:00:00' },
-        { device_id: 1, device_name: 'Living Room', command: 'off', executed: true, executed_at: '2026-04-08T10:30:00', created_at: '2026-04-08T10:30:00' },
-        { device_id: 1, device_name: 'Living Room', command: 'on',  executed: true, executed_at: '2026-04-08T10:50:00', created_at: '2026-04-08T10:50:00' },
-        { device_id: 1, device_name: 'Living Room', command: 'off', executed: true, executed_at: '2026-04-08T11:00:00', created_at: '2026-04-08T11:00:00' },
-        { device_id: 1, device_name: 'Living Room', command: 'on',  executed: true, executed_at: '2026-04-08T11:10:00', created_at: '2026-04-08T11:10:00' },
-        { device_id: 1, device_name: 'Living Room', command: 'off', executed: true, executed_at: '2026-04-08T11:20:00', created_at: '2026-04-08T11:20:00' },
-        { device_id: 1, device_name: 'Living Room', command: 'on',  executed: true, executed_at: '2026-04-08T11:30:00', created_at: '2026-04-08T11:30:00' },
-        { device_id: 1, device_name: 'Living Room', command: 'off', executed: true, executed_at: '2026-04-08T11:40:00', created_at: '2026-04-08T11:40:00' },
-        { device_id: 1, device_name: 'Living Room', command: 'on',  executed: true, executed_at: '2026-04-08T11:52:00', created_at: '2026-04-08T11:52:00' },
-        { device_id: 1, device_name: 'Living Room', command: 'off', executed: true, executed_at: '2026-04-08T12:00:00', created_at: '2026-04-08T12:00:00' },
+        { device_id: 1, device_name: 'Living Room', command: 'on',  trigger: 'manual', executed: true, executed_at: '2026-04-08T10:00:00', created_at: '2026-04-08T10:00:00' },
+        { device_id: 1, device_name: 'Living Room', command: 'off', trigger: 'auto',   executed: true, executed_at: '2026-04-08T10:30:00', created_at: '2026-04-08T10:30:00' },
+        { device_id: 1, device_name: 'Living Room', command: 'on',  trigger: 'manual', executed: true, executed_at: '2026-04-08T10:50:00', created_at: '2026-04-08T10:50:00' },
+        { device_id: 1, device_name: 'Living Room', command: 'off', trigger: 'auto',   executed: true, executed_at: '2026-04-08T11:00:00', created_at: '2026-04-08T11:00:00' },
+        { device_id: 1, device_name: 'Living Room', command: 'on',  trigger: 'manual', executed: true, executed_at: '2026-04-08T11:10:00', created_at: '2026-04-08T11:10:00' },
+        { device_id: 1, device_name: 'Living Room', command: 'off', trigger: 'auto',   executed: true, executed_at: '2026-04-08T11:20:00', created_at: '2026-04-08T11:20:00' },
+        { device_id: 1, device_name: 'Living Room', command: 'on',  trigger: 'manual', executed: true, executed_at: '2026-04-08T11:30:00', created_at: '2026-04-08T11:30:00' },
+        { device_id: 1, device_name: 'Living Room', command: 'off', trigger: 'auto',   executed: true, executed_at: '2026-04-08T11:40:00', created_at: '2026-04-08T11:40:00' },
+        { device_id: 1, device_name: 'Living Room', command: 'on',  trigger: 'manual', executed: true, executed_at: '2026-04-08T11:52:00', created_at: '2026-04-08T11:52:00' },
+        { device_id: 1, device_name: 'Living Room', command: 'off', trigger: 'auto',   executed: true, executed_at: '2026-04-08T12:00:00', created_at: '2026-04-08T12:00:00' },
       ])
     }
 
@@ -40,6 +40,17 @@ export class LightsRepository implements OnModuleInit {
         { room: 'Kitchen',     device_id: 5, is_on: true,  brightness: 100, color_temp: 'cool'    },
       ])
     }
+
+    await Promise.all([
+      this.commandModel.updateMany(
+        { trigger: { $exists: false }, command: 'off', executed: true },
+        { $set: { trigger: 'auto' } },
+      ),
+      this.commandModel.updateMany(
+        { trigger: { $exists: false }, $or: [{ command: 'on' }, { executed: false }] },
+        { $set: { trigger: 'manual' } },
+      ),
+    ])
   }
 
   findAll() {
@@ -68,6 +79,7 @@ export class LightsRepository implements OnModuleInit {
       device_id: setting.device_id,
       device_name: room,
       command,
+      trigger: 'manual',
       executed: false,
       executed_at: null,
       created_at: new Date().toISOString(),

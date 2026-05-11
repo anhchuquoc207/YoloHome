@@ -24,11 +24,12 @@ export class CameraController {
     return this.cameraService.sendCommand(dto)
   }
 
-  @ApiOperation({ summary: 'Nhận kết quả nhận diện khuôn mặt từ Python script' })
-  @Post('recognize')
-  @HttpCode(HttpStatus.CREATED)
-  @ResponseMessage('Recognition processed')
-  processRecognition(@Body() dto: CameraRecognizeDto) {
-    return this.cameraService.processRecognition(dto)
-  }
+@ApiOperation({ summary: 'Nhận kết quả nhận diện khuôn mặt từ Python script' })
+@Post('recognize')
+@HttpCode(HttpStatus.CREATED)
+@ResponseMessage('Recognition processed')
+processRecognition(@Body() dto: CameraRecognizeDto) {
+  console.log('CONTROLLER RECEIVED FACE DTO:', dto)
+  return this.cameraService.processRecognition(dto)
+}
 }

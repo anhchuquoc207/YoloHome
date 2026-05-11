@@ -7,6 +7,7 @@ export declare class CameraService implements OnModuleInit {
     private readonly repository;
     private readonly devicesRepository;
     private mqttClient;
+    private gateCloseTimer?;
     constructor(repository: CameraRepository, devicesRepository: DevicesRepository);
     onModuleInit(): void;
     getLogs(): import("mongoose").Query<(import("mongoose").Document<unknown, {}, import("mongoose").Document<unknown, {}, import("../schemas/camera-log.schema").CameraLog, {}, import("mongoose").DefaultSchemaOptions> & import("../schemas/camera-log.schema").CameraLog & {

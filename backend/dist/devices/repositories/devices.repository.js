@@ -51,7 +51,10 @@ let DevicesRepository = class DevicesRepository {
         });
     }
     updateGateStatus(status) {
-        return this.model.findOneAndUpdate({ type: 'gate' }, { status, last_seen_at: new Date().toISOString() }, { new: true });
+        return this.model.findOneAndUpdate({ type: 'gate' }, { status, last_seen_at: new Date().toISOString() }, { returnDocument: 'after' });
+    }
+    updateCameraStatus(status) {
+        return this.model.findOneAndUpdate({ type: 'camera' }, { status, last_seen_at: new Date().toISOString() }, { returnDocument: 'after' });
     }
 };
 exports.DevicesRepository = DevicesRepository;

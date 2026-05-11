@@ -4,6 +4,7 @@ export declare class LightCommand {
     device_id: number;
     device_name: string;
     command: 'on' | 'off';
+    trigger: 'manual' | 'auto';
     executed: boolean;
     executed_at: string | null;
     created_at: string;
@@ -36,6 +37,15 @@ export declare const LightCommandSchema: import("mongoose").Schema<LightCommand,
         id: string;
     }> | undefined;
     command?: import("mongoose").SchemaDefinitionProperty<"on" | "off", LightCommand, import("mongoose").Document<unknown, {}, LightCommand, {
+        id: string;
+    }, import("mongoose").DefaultSchemaOptions> & Omit<LightCommand & {
+        _id: import("mongoose").Types.ObjectId;
+    } & {
+        __v: number;
+    }, "id"> & {
+        id: string;
+    }> | undefined;
+    trigger?: import("mongoose").SchemaDefinitionProperty<"auto" | "manual", LightCommand, import("mongoose").Document<unknown, {}, LightCommand, {
         id: string;
     }, import("mongoose").DefaultSchemaOptions> & Omit<LightCommand & {
         _id: import("mongoose").Types.ObjectId;

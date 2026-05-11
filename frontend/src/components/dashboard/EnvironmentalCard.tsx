@@ -1,12 +1,11 @@
 import { useQuery } from '@tanstack/react-query'
 import { getCurrentReading, getTemperatureLogs } from '../../services/temperatureService'
-import type { Metric } from './types'
 import { formatTime24h } from '../../utils/formatTime'
+import type { Metric } from './types'
 
 const METRIC_CONFIG: Record<Metric, { label: string; unit: string; defaultMax: number }> = {
-  temperature:     { label: 'Temperature', unit: '°C',  defaultMax: 30 },
-  light_intensity: { label: 'Light',       unit: 'lx',  defaultMax: 600 },
-  air_quality:     { label: 'Air Quality', unit: 'AQI', defaultMax: 100 },
+  temperature: { label: 'Temperature', unit: ' C', defaultMax: 30 },
+  light_intensity: { label: 'Light', unit: 'lx', defaultMax: 600 },
 }
 
 export function EnvironmentalCard({ metric }: { metric: Metric }) {
@@ -18,12 +17,17 @@ export function EnvironmentalCard({ metric }: { metric: Metric }) {
   const sorted = [...(logs.data ?? [])].sort(
     (a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime(),
   )
-  const values = sorted.map((l) => l[metric] as number)
+  const values = sorted.map((log) => log[metric] as number)
   const minT = values.length > 0 ? Math.min(...values) - 1 : 0
   const maxT = values.length > 0 ? Math.max(...values) + 1 : cfg.defaultMax
   const currentVal = current.data?.[metric] ?? '--'
 
-  const W = 320, H = 100, PL = 28, PR = 8, PT = 8, PB = 18
+  const W = 320
+  const H = 100
+  const PL = 28
+  const PR = 8
+  const PT = 8
+  const PB = 18
   const usableW = W - PL - PR
   const usableH = H - PT - PB
   const toX = (i: number) => PL + (i / Math.max(sorted.length - 1, 1)) * usableW
@@ -48,7 +52,7 @@ export function EnvironmentalCard({ metric }: { metric: Metric }) {
       </div>
       <div className="flex items-end gap-1 mb-3">
         <span className="text-4xl font-bold text-stone-900 leading-none">{currentVal}{cfg.unit}</span>
-        <span className="text-sm text-emerald-500 font-semibold mb-1 ml-3">▲ +0.12%</span>
+        <span className="text-sm text-emerald-500 font-semibold mb-1 ml-3">+0.12%</span>
       </div>
 
       <svg viewBox={`0 0 ${W} ${H}`} className="w-full" preserveAspectRatio="none" style={{ height: 130 }}>
@@ -60,8 +64,17 @@ export function EnvironmentalCard({ metric }: { metric: Metric }) {
         </defs>
 
         {ySteps.map((v) => (
-          <line key={v} x1={PL} y1={toY(v)} x2={W - PR} y2={toY(v)}
-            stroke="rgb(214 211 209)" strokeWidth="0.5" strokeDasharray="3 2" opacity="0.4" />
+          <line
+            key={v}
+            x1={PL}
+            y1={toY(v)}
+            x2={W - PR}
+            y2={toY(v)}
+            stroke="rgb(214 211 209)"
+            strokeWidth="0.5"
+            strokeDasharray="3 2"
+            opacity="0.4"
+          />
         ))}
 
         {ySteps.map((v) => (
@@ -86,10 +99,14 @@ export function EnvironmentalCard({ metric }: { metric: Metric }) {
         )}
 
         {sorted.map((d, i) => (
-          <circle key={d.id} cx={toX(i)} cy={toY(values[i] ?? 0)}
+          <circle
+            key={d.id}
+            cx={toX(i)}
+            cy={toY(values[i] ?? 0)}
             r={i === sorted.length - 1 ? 3 : 1.5}
             fill="rgb(234 88 12)"
-            opacity={i === sorted.length - 1 ? 1 : 0.4} />
+            opacity={i === sorted.length - 1 ? 1 : 0.4}
+          />
         ))}
       </svg>
     </div>

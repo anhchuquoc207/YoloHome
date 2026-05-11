@@ -6,10 +6,30 @@ import { LightCard } from './LightCard'
 import { DevicesCard } from './DevicesCard'
 import { ClimateCard } from './ClimateCard'
 import { PowerConsumptionCard } from './PowerConsumptionCard'
+import { NotificationsCard } from './NotificationsCard'
 import type { Metric } from './types'
+
+function getCurrentWeekRange() {
+  const today = new Date()
+
+  const day = today.getDay()
+  const diffToMonday = day === 0 ? -6 : 1 - day
+
+  const monday = new Date(today)
+  monday.setDate(today.getDate() + diffToMonday)
+
+  const sunday = new Date(monday)
+  sunday.setDate(monday.getDate() + 6)
+
+  const monthText = sunday.toLocaleString('en-US', { month: 'short' })
+  const year = sunday.getFullYear()
+
+  return `${monday.getDate()} – ${sunday.getDate()}, ${monthText} ${year}`
+}
 
 export function DashboardPage() {
   const [metric, setMetric] = useState<Metric>('temperature')
+  const currentWeekRange = getCurrentWeekRange()
 
   return (
     <div className="relative min-h-[calc(100vh-120px)]">
@@ -44,7 +64,7 @@ export function DashboardPage() {
                   <rect x="3" y="4" width="18" height="18" rx="2" />
                   <path d="M16 2v4M8 2v4M3 10h18" />
                 </svg>
-                <span className="text-sm font-semibold text-stone-700">20 – 27, Apr 2026</span>
+                <span className="text-sm font-semibold text-stone-700">{currentWeekRange}</span>
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-stone-400">
                   <polyline points="6 9 12 15 18 9" />
                 </svg>
@@ -54,6 +74,10 @@ export function DashboardPage() {
               <DevicesCard />
             </div>
           </div>
+        </div>
+
+        <div className="mt-4 animate-float-up" style={{ animationDelay: '220ms' }}>
+          <NotificationsCard />
         </div>
 
         {/* BOTTOM ROW: 3 cards */}

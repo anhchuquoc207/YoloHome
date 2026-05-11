@@ -13,6 +13,7 @@ export interface DeviceCommand {
   device_id: number
   device_name?: string
   command: string
+  trigger?: 'manual' | 'auto'
   executed: boolean
   executed_at: string | null
   created_at: string
@@ -35,6 +36,7 @@ export interface CameraLog {
   device_id: number | null
   event: 'camera_on' | 'camera_off' | 'face_detected'
   face_label: string | null
+  authorized: 0 | 1 | null
   note: string | null
   created_at: string
 }

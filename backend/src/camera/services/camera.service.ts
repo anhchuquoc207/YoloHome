@@ -8,6 +8,7 @@ import * as mqtt from 'mqtt'
 @Injectable()
 export class CameraService implements OnModuleInit {
   private mqttClient!: mqtt.MqttClient
+  private gateCloseTimer?: NodeJS.Timeout
 
   constructor(
     private readonly repository: CameraRepository,
@@ -31,6 +32,11 @@ export class CameraService implements OnModuleInit {
     this.mqttClient.on('message', async (topic, message) => {
       if (topic === 'YoloHome2907/feeds/V7') {
         const payload = message.toString()
+
+        if (payload === '1') {
+          console.log('🔄 Mạch Yolo:Bit báo cửa đang mở. Cập nhật UI...')
+          await this.devicesRepository.updateGateStatus('open')
+        }
         
         if (payload === '0') {
           console.log('🔄 Mạch Yolo:Bit báo cửa đã đóng. Cập nhật lại UI...')
@@ -48,20 +54,32 @@ export class CameraService implements OnModuleInit {
     return this.repository.findAll()
   }
 
-  sendCommand(dto: CameraCommandDto) {
-    return this.repository.createLog(dto.command)
+async sendCommand(dto: CameraCommandDto) {
+  const status = dto.command === 'on' ? 'active' : 'inactive'
+
+  await this.devicesRepository.updateCameraStatus(status)
+
+  return this.repository.createLog(dto.command)
+}
+
+async processRecognition(dto: CameraRecognizeDto) {
+  console.log('FACE DTO RECEIVED:', dto)
+
+  await this.repository.createFaceLog(dto.face_label, dto.authorized)
+
+  if (dto.authorized === 1) {
+    await this.devicesRepository.updateGateStatus('open')
+
+    this.mqttClient.publish('YoloHome2907/feeds/V7', '1')
+
+    console.log(`🚪 Face ID: [${dto.face_label}] -> Gate open command sent.`)
+  } else {
+    console.log(`⛔ Face ID: [${dto.face_label}] -> Access denied.`)
   }
 
-  async processRecognition(dto: CameraRecognizeDto) {
-    await this.repository.createFaceLog(dto.face_label, dto.authorized)
-
-    if (dto.authorized === 1) {
-      await this.devicesRepository.updateGateStatus('open')
-      
-      this.mqttClient.publish('YoloHome2907/feeds/V7', '1')
-      console.log(`🚪 Face ID: [${dto.face_label}] -> Đã bắn lệnh 1 xuống mạch.`)
-    }
-
-    return { authorized: dto.authorized, face_label: dto.face_label }
-  }
+  return {
+    authorized: dto.authorized,
+    face_label: dto.face_label,
+  };
+}
 }

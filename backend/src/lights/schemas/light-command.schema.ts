@@ -24,6 +24,9 @@ export class LightCommand {
   @Prop({ required: true, enum: ['on', 'off'] })
   command!: 'on' | 'off'
 
+  @Prop({ required: true, enum: ['manual', 'auto'], default: 'manual' })
+  trigger!: 'manual' | 'auto'
+
   @Prop({ default: false })
   executed!: boolean
 

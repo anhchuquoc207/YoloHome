@@ -1,13 +1,15 @@
 import { Controller, Get } from '@nestjs/common'
-import { ApiTags, ApiOperation } from '@nestjs/swagger'
 import { ConfigService } from '@nestjs/config'
+import { ApiOperation, ApiTags } from '@nestjs/swagger'
+import { Public } from '../auth/decorators/public.decorator'
 
 @ApiTags('Health')
 @Controller('health')
 export class HealthController {
   constructor(private readonly config: ConfigService) {}
 
-  @ApiOperation({ summary: 'Kiểm tra trạng thái server' })
+  @ApiOperation({ summary: 'Check server status' })
+  @Public()
   @Get()
   check() {
     return {

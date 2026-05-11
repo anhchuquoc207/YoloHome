@@ -31,6 +31,10 @@ __decorate([
     __metadata("design:type", Object)
 ], CameraLog.prototype, "face_label", void 0);
 __decorate([
+    (0, mongoose_1.Prop)({ type: Number, enum: [0, 1], default: null }),
+    __metadata("design:type", Object)
+], CameraLog.prototype, "authorized", void 0);
+__decorate([
     (0, mongoose_1.Prop)({ type: String, default: null }),
     __metadata("design:type", Object)
 ], CameraLog.prototype, "note", void 0);

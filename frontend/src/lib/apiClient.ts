@@ -1,16 +1,30 @@
+import { clearStoredAuthToken, getStoredAuthToken } from './auth'
+
 const BASE_URL = (import.meta.env.VITE_API_URL as string | undefined) ?? 'http://localhost:3000'
 
 type ApiResponse<T> = { success: true; data: T; message?: string }
 
 async function request<T>(path: string, init?: RequestInit): Promise<T> {
+  const token = getStoredAuthToken()
   const res = await fetch(`${BASE_URL}${path}`, {
-    headers: { 'Content-Type': 'application/json', ...init?.headers },
+    headers: {
+      'Content-Type': 'application/json',
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      ...init?.headers,
+    },
     ...init,
   })
 
   const json = (await res.json()) as ApiResponse<T> | { success: false; error: string }
 
   if (!res.ok || !json.success) {
+    if (res.status === 401) {
+      clearStoredAuthToken()
+      if (typeof window !== 'undefined' && window.location.pathname !== '/login') {
+        window.location.assign('/login')
+      }
+    }
+
     const msg = json.success === false ? json.error : `Request failed: ${res.status}`
     throw new Error(msg)
   }
@@ -20,7 +34,8 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
 
 export const apiClient = {
   get<T>(path: string) {
-    return request<T>(path)
+    const separator = path.includes('?') ? '&' : '?'
+    return request<T>(`${path}${separator}_t=${Date.now()}`)
   },
   post<T>(path: string, body: unknown) {
     return request<T>(path, { method: 'POST', body: JSON.stringify(body) })

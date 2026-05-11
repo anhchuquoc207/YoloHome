@@ -14,6 +14,7 @@ const lights_service_1 = require("./services/lights.service");
 const lights_repository_1 = require("./repositories/lights.repository");
 const light_command_schema_1 = require("./schemas/light-command.schema");
 const room_setting_schema_1 = require("./schemas/room-setting.schema");
+const mqtt_module_1 = require("../mqtt/mqtt.module");
 let LightsModule = class LightsModule {
 };
 exports.LightsModule = LightsModule;
@@ -24,6 +25,7 @@ exports.LightsModule = LightsModule = __decorate([
                 { name: light_command_schema_1.LightCommand.name, schema: light_command_schema_1.LightCommandSchema },
                 { name: room_setting_schema_1.RoomSetting.name, schema: room_setting_schema_1.RoomSettingSchema },
             ]),
+            mqtt_module_1.MqttModule,
         ],
         controllers: [lights_controller_1.LightsController],
         providers: [lights_service_1.LightsService, lights_repository_1.LightsRepository],

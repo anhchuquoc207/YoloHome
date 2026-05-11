@@ -89,34 +89,43 @@ export function CameraPreview({
       if (!ctx) return
       ctx.clearRect(0, 0, canvas.width, canvas.height)
 
+      // Nếu không phát hiện khuôn mặt nào thì không gửi log nhận diện
+      if (resized.length === 0) {
+        return
+      }
+
       const matcher = labeledRef.current.length > 0
         ? new faceapi.FaceMatcher(labeledRef.current, 0.5)
         : null
 
       // Tổng hợp kết quả toàn bộ scan: 1 nếu có bất kỳ khuôn mặt được nhận ra
       let scanAuthorized: 0 | 1 = 0
-      let scanLabel = 'unknown'
+      let scanLabel = 'Unknown'
 
       for (const det of resized) {
         const { x, y, width, height } = det.detection.box
-        const match   = matcher?.findBestMatch(det.descriptor)
-        const isKnown = match ? match.label !== 'unknown' : false
-        const label   = isKnown ? match!.label : 'Unknown'
-        const color   = isKnown ? '#10b981' : '#ef4444'
+        const match = matcher?.findBestMatch(det.descriptor)
+        const mirroredX = canvas.width - x - width
+
+        const matchedLabel = match?.label?.trim() ?? 'unknown'
+        const isKnown = matchedLabel.toLowerCase() !== 'unknown'
+
+        const label = isKnown ? matchedLabel : 'Unknown'
+        const color = isKnown ? '#10b981' : '#ef4444'
 
         if (isKnown) {
           scanAuthorized = 1
-          scanLabel      = match!.label
+          scanLabel = matchedLabel
         }
 
         ctx.strokeStyle = color
         ctx.lineWidth   = 2
-        ctx.strokeRect(x, y, width, height)
+        ctx.strokeRect(mirroredX, y, width, height)
         ctx.fillStyle = color + 'dd'
-        ctx.fillRect(x, y - 26, width, 26)
+        ctx.fillRect(mirroredX, y - 26, width, 26)
         ctx.fillStyle = '#fff'
         ctx.font = 'bold 13px ui-monospace, monospace'
-        ctx.fillText(label, x + 6, y - 8)
+        ctx.fillText(label, mirroredX + 6, y - 8)
       }
 
       // Cập nhật biến authorized sau mỗi lần quét (liên tục, dù có mặt hay không)
@@ -132,11 +141,10 @@ export function CameraPreview({
 
   return (
     <div
-      className="rounded-3xl overflow-hidden relative"
+      className="rounded-3xl overflow-hidden relative aspect-square w-full"
       style={{
         background: 'linear-gradient(160deg, #141418 0%, #0e0e12 60%, #111116 100%)',
         boxShadow: '0 8px 40px rgba(0,0,0,0.22), 0 1px 4px rgba(0,0,0,0.14), inset 0 1px 0 rgba(255,255,255,0.04)',
-        minHeight: 340,
       }}
     >
       {/* Webcam stream */}
@@ -154,7 +162,6 @@ export function CameraPreview({
         <canvas
           ref={canvasRef}
           className="absolute inset-0 pointer-events-none"
-          style={{ transform: 'scaleX(-1)' }}
         />
       )}
 

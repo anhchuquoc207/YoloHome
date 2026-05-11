@@ -13,13 +13,38 @@ export class CameraRepository implements OnModuleInit {
     const count = await this.model.countDocuments()
     if (count === 0) {
       await this.model.insertMany([
-        { user_id: null, device_id: 3, event: 'camera_on',     face_label: null,            note: 'Camera turned on',   created_at: '2026-04-08T08:00:00' },
-        { user_id: 1,    device_id: 3, event: 'face_detected', face_label: 'Unknown',       note: 'Unknown person',     created_at: '2026-04-08T11:30:00' },
-        { user_id: null, device_id: 3, event: 'camera_off',    face_label: null,            note: 'Camera turned off',  created_at: '2026-04-08T12:00:00' },
-        { user_id: null, device_id: 3, event: 'camera_on',     face_label: null,            note: 'Camera turned on',   created_at: '2026-04-08T14:00:00' },
-        { user_id: 1,    device_id: 3, event: 'face_detected', face_label: 'Nguyen Van A',  note: 'Front door',         created_at: '2026-04-08T14:30:00' },
+        { user_id: null, device_id: 3, event: 'camera_on',     face_label: null,            authorized: null, note: 'Camera turned on',                     created_at: '2026-04-08T08:00:00' },
+        { user_id: 1,    device_id: 3, event: 'face_detected', face_label: 'Unknown',       authorized: 0,    note: 'Access denied: Unknown person',       created_at: '2026-04-08T11:30:00' },
+        { user_id: null, device_id: 3, event: 'camera_off',    face_label: null,            authorized: null, note: 'Camera turned off',                    created_at: '2026-04-08T12:00:00' },
+        { user_id: null, device_id: 3, event: 'camera_on',     face_label: null,            authorized: null, note: 'Camera turned on',                     created_at: '2026-04-08T14:00:00' },
+        { user_id: 1,    device_id: 3, event: 'face_detected', face_label: 'Nguyen Van A',  authorized: 1,    note: 'Access granted: Nguyen Van A',       created_at: '2026-04-08T14:30:00' },
       ])
     }
+
+    await Promise.all([
+      this.model.updateMany(
+        { event: { $ne: 'face_detected' }, authorized: { $exists: false } },
+        { $set: { authorized: null } },
+      ),
+      this.model.updateMany(
+        {
+          event: 'face_detected',
+          authorized: { $exists: false },
+          $or: [
+            { note: /Access granted/i },
+            { face_label: { $nin: [null, '', 'Unknown'] } },
+          ],
+        },
+        { $set: { authorized: 1 } },
+      ),
+      this.model.updateMany(
+        {
+          event: 'face_detected',
+          authorized: { $exists: false },
+        },
+        { $set: { authorized: 0 } },
+      ),
+    ])
   }
 
   findAll() {
@@ -32,6 +57,7 @@ export class CameraRepository implements OnModuleInit {
       device_id: 3,
       event: command === 'on' ? 'camera_on' : 'camera_off',
       face_label: null,
+      authorized: null,
       note: command === 'on' ? 'Camera turned on' : 'Camera turned off',
       created_at: new Date().toISOString(),
     })
@@ -43,6 +69,7 @@ export class CameraRepository implements OnModuleInit {
       device_id: 3,
       event: 'face_detected',
       face_label: faceLabel,
+      authorized: authorized === 1 ? 1 : 0,
       note: authorized === 1 ? `Access granted: ${faceLabel}` : 'Access denied: Unknown person',
       created_at: new Date().toISOString(),
     })

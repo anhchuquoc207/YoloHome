@@ -11,6 +11,7 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.TemperatureService = void 0;
 const common_1 = require("@nestjs/common");
+const mqtt = require("mqtt");
 const temperature_repository_1 = require("../repositories/temperature.repository");
 let TemperatureService = class TemperatureService {
     constructor(repository) {
@@ -23,7 +24,55 @@ let TemperatureService = class TemperatureService {
         return this.repository.findLatest();
     }
     createLog(dto) {
-        return this.repository.createLog({ device_id: 2, ...dto });
+        return this.repository.create({
+            device_id: 2,
+            temperature: dto.temperature,
+            humidity: dto.humidity,
+            light_intensity: dto.light_intensity ?? null,
+            air_quality: dto.air_quality ?? null,
+        });
+    }
+    onModuleInit() {
+        const client = mqtt.connect("mqtt://mqtt.ohstem.vn", {
+            port: 1883,
+            username: "YoloHome2907",
+            password: "",
+        });
+        const latest = {
+            temperature: null,
+            humidity: null,
+            light_intensity: null,
+        };
+        client.on("connect", () => {
+            console.log("[MQTT] Connected");
+            client.subscribe("YoloHome2907/feeds/V1");
+            client.subscribe("YoloHome2907/feeds/V2");
+            client.subscribe("YoloHome2907/feeds/V3");
+        });
+        client.on("message", async (topic, payload) => {
+            const value = Number(payload.toString());
+            if (topic === "YoloHome2907/feeds/V1")
+                latest.temperature = value;
+            if (topic === "YoloHome2907/feeds/V2")
+                latest.humidity = value;
+            if (topic === "YoloHome2907/feeds/V3")
+                latest.light_intensity = value;
+            console.log("[MQTT] topic =", topic, "| value =", value);
+            if (latest.temperature !== null &&
+                latest.humidity !== null &&
+                latest.light_intensity !== null) {
+                await this.repository.create({
+                    device_id: 2,
+                    temperature: latest.temperature,
+                    humidity: latest.humidity,
+                    light_intensity: latest.light_intensity,
+                    air_quality: null,
+                });
+            }
+        });
+        client.on("error", (err) => {
+            console.error("[MQTT] Error:", err);
+        });
     }
 };
 exports.TemperatureService = TemperatureService;

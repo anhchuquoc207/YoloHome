@@ -4,7 +4,6 @@ import {
   getLightCommands,
   getRoomSettings,
   sendRoomCommand,
-  updateRoomSettings,
   type RoomSetting,
 } from '../../services/lightService'
 import { useState } from 'react'
@@ -38,29 +37,6 @@ export function LightsPage() {
     },
   })
 
-  const roomSettingsMutation = useMutation({
-    mutationFn: ({ room, settings }: { room: string; settings: { brightness?: number; color_temp?: string } }) =>
-      updateRoomSettings(room, settings),
-    onMutate: async ({ room, settings }) => {
-      await queryClient.cancelQueries({ queryKey: ['roomSettings'] })
-      const prev = queryClient.getQueryData<RoomSetting[]>(['roomSettings'])
-      queryClient.setQueryData<RoomSetting[]>(['roomSettings'], (old) =>
-        old?.map((s) => s.room === room ? {
-          ...s,
-          ...(settings.brightness !== undefined ? { brightness: settings.brightness } : {}),
-          ...(settings.color_temp !== undefined ? { color_temp: settings.color_temp as RoomSetting['color_temp'] } : {}),
-        } : s) ?? [],
-      )
-      return { prev }
-    },
-    onError: (_err, _vars, ctx) => {
-      queryClient.setQueryData(['roomSettings'], ctx?.prev)
-    },
-    onSettled: () => {
-      queryClient.invalidateQueries({ queryKey: ['roomSettings'] })
-    },
-  })
-
   const getRoom = (roomName: string, defaults: { isOn: boolean; brightness: number; colorTemp: ColorTemp }) => {
     const r = roomSettings.data?.find((s) => s.room === roomName)
     if (!r) return defaults
@@ -71,12 +47,6 @@ export function LightsPage() {
     const current = roomSettings.data?.find((s) => s.room === room)?.is_on ?? false
     roomCommandMutation.mutate({ room, command: current ? 'off' : 'on' })
   }
-
-  const setBrightness = (room: string, brightness: number) =>
-    roomSettingsMutation.mutate({ room, settings: { brightness } })
-
-  const setColorTemp = (room: string, colorTemp: ColorTemp) =>
-    roomSettingsMutation.mutate({ room, settings: { color_temp: colorTemp } })
 
   const allCommands = [...(commands.data ?? [])].sort(
     (a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime(),
@@ -101,9 +71,7 @@ export function LightsPage() {
       isOn: bed.isOn,
       brightness: bed.brightness,
       colorTemp: bed.colorTemp,
-      onToggle:     () => toggle('Bedroom'),
-      onBrightness: (v) => setBrightness('Bedroom', v),
-      onColorTemp:  (v) => setColorTemp('Bedroom', v),
+      onToggle: () => toggle('Bedroom'),
     },
     {
       key: 'living Room',
@@ -113,9 +81,7 @@ export function LightsPage() {
       isOn: living.isOn,
       brightness: living.brightness,
       colorTemp: living.colorTemp,
-      onToggle:     () => toggle('Living Room'),
-      onBrightness: (v) => setBrightness('Living Room', v),
-      onColorTemp:  (v) => setColorTemp('Living Room', v),
+      onToggle: () => toggle('Living Room'),
     },
     {
       key: 'Kitchen',
@@ -125,9 +91,7 @@ export function LightsPage() {
       isOn: kitchen.isOn,
       brightness: kitchen.brightness,
       colorTemp: kitchen.colorTemp,
-      onToggle:     () => toggle('Kitchen'),
-      onBrightness: (v) => setBrightness('Kitchen', v),
-      onColorTemp:  (v) => setColorTemp('Kitchen', v),
+      onToggle: () => toggle('Kitchen'),
     },
   ]
 

@@ -1,10 +1,12 @@
-import { LightsRepository } from '../repositories/lights.repository';
-import type { CreateCommandDto } from '../dto/create-command.dto';
-import type { RoomCommandDto } from '../dto/room-command.dto';
-import type { UpdateRoomSettingsDto } from '../dto/update-room-settings.dto';
+import { LightsRepository } from "../repositories/lights.repository";
+import type { CreateCommandDto } from "../dto/create-command.dto";
+import type { RoomCommandDto } from "../dto/room-command.dto";
+import type { UpdateRoomSettingsDto } from "../dto/update-room-settings.dto";
+import { MqttService } from "../../mqtt/mqtt.service";
 export declare class LightsService {
     private readonly repository;
-    constructor(repository: LightsRepository);
+    private readonly mqttService;
+    constructor(repository: LightsRepository, mqttService: MqttService);
     getCommands(): import("mongoose").Query<(import("mongoose").Document<unknown, {}, import("mongoose").Document<unknown, {}, import("../schemas/light-command.schema").LightCommand, {}, import("mongoose").DefaultSchemaOptions> & import("../schemas/light-command.schema").LightCommand & {
         _id: import("mongoose").Types.ObjectId;
     } & {

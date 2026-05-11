@@ -1,17 +1,9 @@
-import { OnModuleInit } from '@nestjs/common';
-import { Model } from 'mongoose';
-import { TemperatureLog, type TemperatureLogDocument } from '../schemas/temperature-log.schema';
-export declare class TemperatureRepository implements OnModuleInit {
+import { Model } from "mongoose";
+import { TemperatureLog, type TemperatureLogDocument } from "../schemas/temperature-log.schema";
+export declare class TemperatureRepository {
     private readonly model;
     constructor(model: Model<TemperatureLogDocument>);
-    onModuleInit(): Promise<void>;
-    findAll(): import("mongoose").Query<(import("mongoose").Document<unknown, {}, import("mongoose").Document<unknown, {}, TemperatureLog, {}, import("mongoose").DefaultSchemaOptions> & TemperatureLog & {
-        _id: import("mongoose").Types.ObjectId;
-    } & {
-        __v: number;
-    } & {
-        id: string;
-    }, {}, import("mongoose").DefaultSchemaOptions> & import("mongoose").Document<unknown, {}, TemperatureLog, {}, import("mongoose").DefaultSchemaOptions> & TemperatureLog & {
+    findAll(): import("mongoose").Query<(import("mongoose").Document<unknown, {}, TemperatureLog, {}, import("mongoose").DefaultSchemaOptions> & TemperatureLog & {
         _id: import("mongoose").Types.ObjectId;
     } & {
         __v: number;
@@ -40,13 +32,7 @@ export declare class TemperatureRepository implements OnModuleInit {
     } & {
         id: string;
     }, "find", {}>;
-    findLatest(): import("mongoose").Query<(import("mongoose").Document<unknown, {}, import("mongoose").Document<unknown, {}, TemperatureLog, {}, import("mongoose").DefaultSchemaOptions> & TemperatureLog & {
-        _id: import("mongoose").Types.ObjectId;
-    } & {
-        __v: number;
-    } & {
-        id: string;
-    }, {}, import("mongoose").DefaultSchemaOptions> & import("mongoose").Document<unknown, {}, TemperatureLog, {}, import("mongoose").DefaultSchemaOptions> & TemperatureLog & {
+    findLatest(): import("mongoose").Query<(import("mongoose").Document<unknown, {}, TemperatureLog, {}, import("mongoose").DefaultSchemaOptions> & TemperatureLog & {
         _id: import("mongoose").Types.ObjectId;
     } & {
         __v: number;
@@ -75,12 +61,12 @@ export declare class TemperatureRepository implements OnModuleInit {
     } & {
         id: string;
     }, "findOne", {}>;
-    createLog(data: {
+    create(data: {
         device_id: number;
         temperature: number;
         humidity: number;
-        light_intensity?: number;
-        air_quality?: number;
+        light_intensity: number | null;
+        air_quality: number | null;
     }): Promise<import("mongoose").Document<unknown, {}, import("mongoose").Document<unknown, {}, TemperatureLog, {}, import("mongoose").DefaultSchemaOptions> & TemperatureLog & {
         _id: import("mongoose").Types.ObjectId;
     } & {

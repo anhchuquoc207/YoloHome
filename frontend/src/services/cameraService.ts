@@ -19,10 +19,16 @@ export function sendCameraCommand(command: 'on' | 'off'): Promise<void> {
   return apiClient.post<void>('/camera/commands', { command })
 }
 
-export function sendRecognition(authorized: 0 | 1, faceLabel: string): Promise<void> {
-  return apiClient.post<void>('/camera/recognize', {
-    authorized,
-    face_label: faceLabel,
-    device_id: 3,
-  })
+export function sendRecognition(
+  authorized: 0 | 1,
+  label: string
+): Promise<{ authorized: 0 | 1; face_label: string }> {
+  return apiClient.post<{ authorized: 0 | 1; face_label: string }>(
+    '/camera/recognize',
+    {
+      device_id: 1,
+      face_label: label,
+      authorized,
+    }
+  )
 }

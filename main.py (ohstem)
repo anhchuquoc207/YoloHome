@@ -15,151 +15,97 @@ from aiot_rgbled import RGBLed
 aiot_lcd1602 = LCD1602()
 event_manager.reset()
 
-# Khởi tạo Đèn và Servo
 tiny_rgb = RGBLed(pin0.pin, 4)
-pin4.servo_write(0)
 
+from aiot_dht20 import DHT20
 aiot_dht20 = DHT20()
 print("DHT20 OK")
 
-# ==========================================
-# CÁC HÀM XỬ LÝ SENSOR VÀ ĐÈN
-# ==========================================
 def on_event_timer_callback_sensor():
-    global RT, RH, LUX
-    try:
-        aiot_dht20.read_dht20()
-        RT = aiot_dht20.dht20_temperature()
-        RH = aiot_dht20.dht20_humidity()
-        LUX = round(translate(pin2.read_analog(), 0, 4095, 0, 100))
+  global RT, RH, LUX
+  try:
+    aiot_dht20.read_dht20()
+    RT = aiot_dht20.dht20_temperature()
+    RH = aiot_dht20.dht20_humidity()
+    LUX = round(translate(pin2.read_analog(), 0, 4095, 0, 100))
 
-        aiot_lcd1602.move_to(0, 0)
-        aiot_lcd1602.putstr('                ')
-        aiot_lcd1602.move_to(0, 0)
-        aiot_lcd1602.putstr(str(RT) + '*C   ' + str(RH) + '%   ' + str(LUX))
+    print('RT =', RT, 'RH =', RH, 'LUX =', LUX)
 
-        if LUX < 30:
-            tiny_rgb.show(4, hex_to_rgb('#0000ff'))
-        elif LUX < 70:
-            tiny_rgb.show(4, hex_to_rgb('#ffff00'))
-        else:
-            tiny_rgb.show(4, hex_to_rgb('#ff0000'))
+    aiot_lcd1602.move_to(0, 0)
+    aiot_lcd1602.putstr('                ')
+    aiot_lcd1602.move_to(0, 0)
+    aiot_lcd1602.putstr(str(RT))
 
-        mqtt.publish('V1', str(RT))
-        mqtt.publish('V2', str(RH))
-        mqtt.publish('V3', str(LUX))
-    except Exception as e:
-        pass
+    aiot_lcd1602.move_to(4, 0)
+    aiot_lcd1602.putstr('*C')
+
+    aiot_lcd1602.move_to(8, 0)
+    aiot_lcd1602.putstr('   ')
+    aiot_lcd1602.move_to(8, 0)
+    aiot_lcd1602.putstr(str(RH))
+
+    aiot_lcd1602.move_to(10, 0)
+    aiot_lcd1602.putstr('%')
+
+    aiot_lcd1602.move_to(13, 0)
+    aiot_lcd1602.putstr('   ')
+    aiot_lcd1602.move_to(13, 0)
+    aiot_lcd1602.putstr(str(LUX))
+
+    if LUX < 30:
+      tiny_rgb.show(0, hex_to_rgb('#0000ff'))
+    elif LUX < 70:
+      tiny_rgb.show(0, hex_to_rgb('#ffff00'))
+    else:
+      tiny_rgb.show(0, hex_to_rgb('#ff0000'))
+
+    mqtt.publish('V1', str(RT))
+    mqtt.publish('V2', str(RH))
+    mqtt.publish('V3', str(LUX))
+
+  except Exception as e:
+    print('Loi sensor/LCD/RGB:', e)
 
 event_manager.add_timer_event(1000, on_event_timer_callback_sensor)
 
 def on_event_timer_callback_time():
-    try:
-        (year, month, mday, week_of_year, hour, minute, second, milisecond) = RTC().datetime()
-        time_str = '%02d/%02d/%02d    %02d:%02d' % (mday, month, year, hour, minute)
-        aiot_lcd1602.move_to(0, 1)
-        aiot_lcd1602.putstr(time_str)
-    except Exception as e:
-        pass
+  try:
+    aiot_lcd1602.move_to(0, 1)
+    aiot_lcd1602.putstr(('%0*d' % (2, RTC().datetime()[2])))
+    aiot_lcd1602.move_to(2, 1)
+    aiot_lcd1602.putstr('/')
+    aiot_lcd1602.move_to(3, 1)
+    aiot_lcd1602.putstr(('%0*d' % (2, RTC().datetime()[1])))
+    aiot_lcd1602.move_to(5, 1)
+    aiot_lcd1602.putstr('/')
+    aiot_lcd1602.move_to(6, 1)
+    aiot_lcd1602.putstr(('%0*d' % (2, RTC().datetime()[0])))
+    aiot_lcd1602.move_to(11, 1)
+    aiot_lcd1602.putstr(('%0*d' % (2, RTC().datetime()[4])))
+    aiot_lcd1602.move_to(13, 1)
+    aiot_lcd1602.putstr(':')
+    aiot_lcd1602.move_to(14, 1)
+    aiot_lcd1602.putstr(('%0*d' % (2, RTC().datetime()[5])))
+  except Exception as e:
+    print('Loi time:', e)
 
 event_manager.add_timer_event(1000, on_event_timer_callback_time)
 
-def tinh_mau_den(do_sang_str):
-    try:
-        do_sang = int(do_sang_str)
-        if do_sang == 0: return hex_to_rgb('#000000')
-        return hex_to_rgb('#%02x%02x%02x' % (int((do_sang/100)*255), int((do_sang/100)*200), int((do_sang/100)*100)))
-    except:
-        return hex_to_rgb('#000000')
-
-def on_mqtt_message_v4(msg): tiny_rgb.show(1, tinh_mau_den(msg))
-def on_mqtt_message_v5(msg): tiny_rgb.show(2, tinh_mau_den(msg))
-def on_mqtt_message_v6(msg): tiny_rgb.show(3, tinh_mau_den(msg))
-
-# ==========================================
-# XỬ LÝ CỬA SERVO (ĐÃ FIX LỖI & TỐI ƯU)
-# ==========================================
-dang_mo_cua = False
-thoi_gian_mo = 0
-thoi_gian_bat_may = 0 
-THOI_GIAN_MO_CUA = 7000
-
-def on_mqtt_message_v7(msg):
-    global dang_mo_cua, thoi_gian_mo, thoi_gian_bat_may
-    du_lieu = str(msg).strip()
-    
-    # KHIÊN BẢO VỆ: Chặn mọi tin nhắn ma trong 3 giây sau khi CÓ MẠNG
-    # Sử dụng ticks_diff để chống lỗi tràn bộ đếm
-    if time.ticks_diff(time.ticks_ms(), thoi_gian_bat_may) < 3000:
-        print("=> Da chan lenh rac:", du_lieu)
-        return
-
-    if du_lieu == '1':
-        thoi_gian_mo = time.ticks_ms() # Reset lại mốc thời gian
-        if dang_mo_cua == False:
-            print("=> NGUOI QUEN: Mo cua!")
-            pin4.servo_write(90)
-            display.show(Image.YES)
-            dang_mo_cua = True
-        else:
-            print("=> Gia han them 7 giay mo cua!")
-            
-    elif du_lieu == '0':
-        if dang_mo_cua == True:
-            print("=> KHOA CUA TỪ XA!")
-            pin4.servo_write(0)
-            display.show(Image.NO)
-            dang_mo_cua = False
-
-def canh_gio_dong_cua():
-    global dang_mo_cua, thoi_gian_mo
-    try:
-        # Sử dụng time.ticks_diff thay vì dấu trừ trực tiếp
-        thoi_gian_da_troi_qua = time.ticks_diff(time.ticks_ms(), thoi_gian_mo)
-        
-        if dang_mo_cua == True and (thoi_gian_da_troi_qua >= THOI_GIAN_MO_CUA):
-            print("=> HET 7 GIAY, TU DONG DONG CUA!")
-            pin4.servo_write(0)
-            display.show(Image.NO)
-            dang_mo_cua = False
-            mqtt.publish('V7', '0') # Đồng bộ trạng thái về Dashboard
-    except Exception as e:
-        pass
-
-
-event_manager.add_timer_event(500, canh_gio_dong_cua)
-
-# ==========================================
-# KẾT NỐI MẠNG VÀ KHỞI ĐỘNG
-# ==========================================
 display.scroll('YH')
-mqtt.connect_wifi('iPhone', 'anh12345')
+mqtt.connect_wifi('PHIỀN VL', '22222222')
 mqtt.connect_broker(server='mqtt.ohstem.vn', port=1883, username='YoloHome2907', password='')
 
-mqtt.on_receive_message('V4', on_mqtt_message_v4)
-mqtt.on_receive_message('V5', on_mqtt_message_v5)
-mqtt.on_receive_message('V6', on_mqtt_message_v6)
-mqtt.on_receive_message('V7', on_mqtt_message_v7)
-
 try:
-    ntptime.settime()
-    (year, month, mday, week_of_year, hour, minute, second, milisecond) = RTC().datetime()
-    RTC().init((year, month, mday, week_of_year, hour + 7, minute, second, milisecond))
+  ntptime.settime()
+  (year, month, mday, week_of_year, hour, minute, second, milisecond) = RTC().datetime()
+  RTC().init((year, month, mday, week_of_year, hour + 7, minute, second, milisecond))
 except Exception as e:
-    pass
+  print('Loi NTP:', e)
 
 aiot_lcd1602.clear()
 display.scroll('OK')
 
-# QUAN TRỌNG NHẤT LÀ DÒNG NÀY: Bắt đầu tính 3 giây khiên bảo vệ từ lúc này
-thoi_gian_bat_may = time.ticks_ms()
-
-# Vòng lặp chính bọc thép chống đứng máy
 while True:
-    try:
-        event_manager.run()
-        mqtt.check_message()
-    except Exception as e:
-        # Nếu có lỗi mạng nhẹ, mạch sẽ phớt lờ và chạy tiếp, không bị đứng máy!
-        pass 
-    time.sleep_ms(100)
+  event_manager.run()
+  mqtt.check_message()
+  time.sleep_ms(100)

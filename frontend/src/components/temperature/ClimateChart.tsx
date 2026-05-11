@@ -19,14 +19,8 @@ export function ClimateChart({ sorted, minTemp, maxTemp }: {
   const toX = (i: number) => PL + (i / Math.max(sorted.length - 1, 1)) * usableW
   const toY = (v: number) => PT + usableH - ((v - chartMin) / (chartMax - chartMin)) * usableH
 
-  const humids = sorted.map((l) => l.humidity)
-  const hMin = Math.min(...humids) - 3
-  const hMax = Math.max(...humids) + 3
-  const toHY = (v: number) => PT + usableH - ((v - hMin) / (hMax - hMin)) * usableH
-
   const tempLine = sorted.map((l, i) => `${i === 0 ? 'M' : 'L'}${toX(i)},${toY(l.temperature)}`).join(' ')
   const tempArea = `M${toX(0)},${toY(chartMin)} ${sorted.map((l, i) => `L${toX(i)},${toY(l.temperature)}`).join(' ')} L${toX(sorted.length - 1)},${toY(chartMin)} Z`
-  const humidLine = sorted.map((l, i) => `${i === 0 ? 'M' : 'L'}${toX(i)},${toHY(l.humidity)}`).join(' ')
 
   const comfortTop = toY(Math.min(26, chartMax))
   const comfortBot = toY(Math.max(22, chartMin))
@@ -82,9 +76,6 @@ export function ClimateChart({ sorted, minTemp, maxTemp }: {
       })}
 
       <path d={tempArea} fill="url(#tempFill)" />
-
-      <polyline points={humidLine} fill="none" stroke="#60a5fa" strokeWidth="1.5"
-        strokeLinecap="round" strokeLinejoin="round" opacity="0.40" strokeDasharray="6 4" />
 
       <polyline points={tempLine} fill="none" stroke="#C8601F" strokeWidth="2.5"
         strokeLinecap="round" strokeLinejoin="round" />

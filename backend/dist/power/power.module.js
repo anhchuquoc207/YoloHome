@@ -8,14 +8,21 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.PowerModule = void 0;
 const common_1 = require("@nestjs/common");
+const mongoose_1 = require("@nestjs/mongoose");
 const power_controller_1 = require("./controllers/power.controller");
 const power_service_1 = require("./services/power.service");
 const power_repository_1 = require("./repositories/power.repository");
+const light_command_schema_1 = require("../lights/schemas/light-command.schema");
 let PowerModule = class PowerModule {
 };
 exports.PowerModule = PowerModule;
 exports.PowerModule = PowerModule = __decorate([
     (0, common_1.Module)({
+        imports: [
+            mongoose_1.MongooseModule.forFeature([
+                { name: light_command_schema_1.LightCommand.name, schema: light_command_schema_1.LightCommandSchema },
+            ]),
+        ],
         controllers: [power_controller_1.PowerController],
         providers: [power_service_1.PowerService, power_repository_1.PowerRepository],
     })

@@ -26,6 +26,23 @@ let CameraService = class CameraService {
         });
         this.mqttClient.on('connect', () => {
             console.log('✅ Backend đã kết nối thành công với OhStem MQTT!');
+            this.mqttClient.subscribe('YoloHome2907/feeds/V7', (err) => {
+                if (!err)
+                    console.log('🎧 Đang lắng nghe trạng thái cửa trên kênh V7');
+            });
+        });
+        this.mqttClient.on('message', async (topic, message) => {
+            if (topic === 'YoloHome2907/feeds/V7') {
+                const payload = message.toString();
+                if (payload === '1') {
+                    console.log('🔄 Mạch Yolo:Bit báo cửa đang mở. Cập nhật UI...');
+                    await this.devicesRepository.updateGateStatus('open');
+                }
+                if (payload === '0') {
+                    console.log('🔄 Mạch Yolo:Bit báo cửa đã đóng. Cập nhật lại UI...');
+                    await this.devicesRepository.updateGateStatus('closed');
+                }
+            }
         });
         this.mqttClient.on('error', (err) => {
             console.error('❌ Lỗi kết nối MQTT:', err);
@@ -34,17 +51,26 @@ let CameraService = class CameraService {
     getLogs() {
         return this.repository.findAll();
     }
-    sendCommand(dto) {
+    async sendCommand(dto) {
+        const status = dto.command === 'on' ? 'active' : 'inactive';
+        await this.devicesRepository.updateCameraStatus(status);
         return this.repository.createLog(dto.command);
     }
     async processRecognition(dto) {
+        console.log('FACE DTO RECEIVED:', dto);
         await this.repository.createFaceLog(dto.face_label, dto.authorized);
         if (dto.authorized === 1) {
             await this.devicesRepository.updateGateStatus('open');
             this.mqttClient.publish('YoloHome2907/feeds/V7', '1');
-            console.log(`🚪 Face ID: [${dto.face_label}] -> Đã bắn lệnh 1 xuống mạch.`);
+            console.log(`🚪 Face ID: [${dto.face_label}] -> Gate open command sent.`);
         }
-        return { authorized: dto.authorized, face_label: dto.face_label };
+        else {
+            console.log(`⛔ Face ID: [${dto.face_label}] -> Access denied.`);
+        }
+        return {
+            authorized: dto.authorized,
+            face_label: dto.face_label,
+        };
     }
 };
 exports.CameraService = CameraService;

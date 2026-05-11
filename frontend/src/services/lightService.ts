@@ -1,5 +1,5 @@
 import { apiClient } from '../lib/apiClient'
-import type { Device, DeviceCommand } from '../types'
+import type { DeviceCommand } from '../types'
 
 export interface RoomSetting {
   room: string
@@ -9,9 +9,9 @@ export interface RoomSetting {
   color_temp: 'warm' | 'neutral' | 'cool'
 }
 
-export async function getLight(): Promise<Device | undefined> {
-  const arr = await apiClient.get<Device[]>('/devices?type=light')
-  return arr[0]
+export async function getLight(): Promise<RoomSetting | undefined> {
+  const rooms = await apiClient.get<RoomSetting[]>('/lights/rooms')
+  return rooms.find((room) => room.room === 'Living Room')
 }
 
 export function getLightCommands(): Promise<DeviceCommand[]> {

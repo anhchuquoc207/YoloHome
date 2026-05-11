@@ -11,8 +11,9 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.HealthController = void 0;
 const common_1 = require("@nestjs/common");
-const swagger_1 = require("@nestjs/swagger");
 const config_1 = require("@nestjs/config");
+const swagger_1 = require("@nestjs/swagger");
+const public_decorator_1 = require("../auth/decorators/public.decorator");
 let HealthController = class HealthController {
     constructor(config) {
         this.config = config;
@@ -28,7 +29,8 @@ let HealthController = class HealthController {
 };
 exports.HealthController = HealthController;
 __decorate([
-    (0, swagger_1.ApiOperation)({ summary: 'Kiểm tra trạng thái server' }),
+    (0, swagger_1.ApiOperation)({ summary: 'Check server status' }),
+    (0, public_decorator_1.Public)(),
     (0, common_1.Get)(),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", []),

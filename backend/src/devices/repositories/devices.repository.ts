@@ -42,11 +42,19 @@ export class DevicesRepository implements OnModuleInit {
     })
   }
 
-  updateGateStatus(status: 'open' | 'closed') {
-    return this.model.findOneAndUpdate(
-      { type: 'gate' },
-      { status, last_seen_at: new Date().toISOString() },
-      { new: true },
-    )
-  }
+updateGateStatus(status: 'open' | 'closed') {
+  return this.model.findOneAndUpdate(
+    { type: 'gate' },
+    { status, last_seen_at: new Date().toISOString() },
+    { returnDocument: 'after' },
+  )
+}
+
+updateCameraStatus(status: 'active' | 'inactive') {
+  return this.model.findOneAndUpdate(
+    { type: 'camera' },
+    { status, last_seen_at: new Date().toISOString() },
+    { returnDocument: 'after' },
+  )
+}
 }

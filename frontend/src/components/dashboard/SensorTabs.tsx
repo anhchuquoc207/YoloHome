@@ -20,15 +20,6 @@ const tabs: { id: Metric; label: string; icon: ReactNode }[] = [
       </svg>
     ),
   },
-  {
-    id: 'air_quality',
-    label: 'Air Quality',
-    icon: (
-      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
-        <path d="M9.59 4.59A2 2 0 1111 8H2m10.59 11.41A2 2 0 1014 16H2m15.73-8.27A2.5 2.5 0 1119.5 12H2" />
-      </svg>
-    ),
-  },
 ]
 
 export function SensorTabs({ metric, onChange }: { metric: Metric; onChange: (m: Metric) => void }) {

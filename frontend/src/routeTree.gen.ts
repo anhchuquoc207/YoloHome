@@ -10,6 +10,7 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as TemperatureRouteImport } from './routes/temperature'
+import { Route as LoginRouteImport } from './routes/login'
 import { Route as LightsRouteImport } from './routes/lights'
 import { Route as CameraRouteImport } from './routes/camera'
 import { Route as IndexRouteImport } from './routes/index'
@@ -17,6 +18,11 @@ import { Route as IndexRouteImport } from './routes/index'
 const TemperatureRoute = TemperatureRouteImport.update({
   id: '/temperature',
   path: '/temperature',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LoginRoute = LoginRouteImport.update({
+  id: '/login',
+  path: '/login',
   getParentRoute: () => rootRouteImport,
 } as any)
 const LightsRoute = LightsRouteImport.update({
@@ -39,12 +45,14 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/camera': typeof CameraRoute
   '/lights': typeof LightsRoute
+  '/login': typeof LoginRoute
   '/temperature': typeof TemperatureRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/camera': typeof CameraRoute
   '/lights': typeof LightsRoute
+  '/login': typeof LoginRoute
   '/temperature': typeof TemperatureRoute
 }
 export interface FileRoutesById {
@@ -52,20 +60,22 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/camera': typeof CameraRoute
   '/lights': typeof LightsRoute
+  '/login': typeof LoginRoute
   '/temperature': typeof TemperatureRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/camera' | '/lights' | '/temperature'
+  fullPaths: '/' | '/camera' | '/lights' | '/login' | '/temperature'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/camera' | '/lights' | '/temperature'
-  id: '__root__' | '/' | '/camera' | '/lights' | '/temperature'
+  to: '/' | '/camera' | '/lights' | '/login' | '/temperature'
+  id: '__root__' | '/' | '/camera' | '/lights' | '/login' | '/temperature'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   CameraRoute: typeof CameraRoute
   LightsRoute: typeof LightsRoute
+  LoginRoute: typeof LoginRoute
   TemperatureRoute: typeof TemperatureRoute
 }
 
@@ -76,6 +86,13 @@ declare module '@tanstack/react-router' {
       path: '/temperature'
       fullPath: '/temperature'
       preLoaderRoute: typeof TemperatureRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/login': {
+      id: '/login'
+      path: '/login'
+      fullPath: '/login'
+      preLoaderRoute: typeof LoginRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/lights': {
@@ -106,6 +123,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   CameraRoute: CameraRoute,
   LightsRoute: LightsRoute,
+  LoginRoute: LoginRoute,
   TemperatureRoute: TemperatureRoute,
 }
 export const routeTree = rootRouteImport

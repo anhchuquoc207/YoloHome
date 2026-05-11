@@ -1,11 +1,14 @@
-import { Outlet } from '@tanstack/react-router'
+import { Outlet, useRouterState } from '@tanstack/react-router'
 import Header from './Header'
 
 export default function Layout() {
+  const pathname = useRouterState({ select: (state) => state.location.pathname })
+  const isLoginPage = pathname === '/login'
+
   return (
-    <div className="flex flex-col min-h-screen bg-[#e6e2d2]">
-      <Header />
-      <main className="flex-1 px-4 sm:px-8 lg:px-14 pb-8 overflow-auto">
+    <div className={`flex min-h-screen flex-col ${isLoginPage ? 'bg-[#ece7da]' : 'bg-[#e6e2d2]'}`}>
+      {!isLoginPage && <Header />}
+      <main className={isLoginPage ? 'flex-1' : 'flex-1 overflow-auto px-4 pb-8 sm:px-8 lg:px-14'}>
         <Outlet />
       </main>
     </div>

@@ -8,4 +8,6 @@
 export const KNOWN_FACES: Record<string, string> = {
   quynh:   '/known_faces/quynh.jpg',
   quocanh: '/known_faces/quocanh.jpg',
+  kim: '/known_faces/kim.jpg',
+
 }

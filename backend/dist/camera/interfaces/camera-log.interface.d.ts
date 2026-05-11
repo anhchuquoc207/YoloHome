@@ -4,6 +4,7 @@ export interface CameraLog {
     device_id: number | null;
     event: 'camera_on' | 'camera_off' | 'face_detected';
     face_label: string | null;
+    authorized: 0 | 1 | null;
     note: string | null;
     created_at: string;
 }

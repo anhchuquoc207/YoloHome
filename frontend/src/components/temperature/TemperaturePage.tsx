@@ -3,7 +3,6 @@ import { getCurrentReading, getTemperatureLogs } from '../../services/temperatur
 import { formatTime24h } from '../../utils/formatTime'
 import { useState } from 'react'
 import { TemperatureHero } from './TemperatureHero'
-import { HumidityHero } from './HumidityHero'
 import { InsightCard } from './InsightCard'
 import { ClimateChart } from './ClimateChart'
 import { fmtTime12 } from './utils'
@@ -27,9 +26,7 @@ export function TemperaturePage() {
   const lowEntry  = sorted.length ? sorted.reduce((m, l) => (l.temperature < m.temperature ? l : m), sorted[0]) : null
 
   const t = current.data?.temperature ?? 0
-  const h = current.data?.humidity ?? 0
   const tempStatus  = t >= 22 && t <= 26 ? 'Comfortable' : t < 22 ? 'Slightly Cool' : 'Slightly Warm'
-  const humidStatus = h >= 40 && h <= 70 ? 'Optimal' : h < 40 ? 'Dry' : 'Humid'
 
   const last6 = sorted.slice(-6).map((l) => l.temperature)
   const trendText = last6.length >= 2 && last6[last6.length - 1] > last6[0] ? 'Warming up' : 'Cooling down'
@@ -51,9 +48,8 @@ export function TemperaturePage() {
       </div>
 
       {/* Hero Metrics */}
-      <div className="grid grid-cols-1 sm:grid-cols-5 gap-4 animate-float-up" style={{ animationDelay: '80ms' }}>
+      <div className="grid grid-cols-1 gap-4 animate-float-up" style={{ animationDelay: '80ms' }}>
         <TemperatureHero value={current.data?.temperature} status={tempStatus} />
-        <HumidityHero value={current.data?.humidity} status={humidStatus} />
       </div>
 
       {/* Insight Cards */}
@@ -89,11 +85,10 @@ export function TemperaturePage() {
         <div className="px-7 pt-6 pb-2 flex items-center justify-between">
           <div>
             <h2 className="text-[20px] font-semibold text-stone-900 tracking-tight">Climate Timeline</h2>
-            <p className="text-[13px] text-stone-500 mt-0.5">24-hour temperature &amp; humidity</p>
+            <p className="text-[13px] text-stone-500 mt-0.5">24-hour temperature movement</p>
           </div>
           <div className="flex items-center gap-5 text-[11px] font-medium text-stone-500">
             <span className="flex items-center gap-2"><span className="w-4 h-0.5 rounded-full bg-[#C8601F]" />Temperature</span>
-            <span className="flex items-center gap-2"><span className="w-4 h-0.5 rounded-full bg-[#60a5fa] opacity-60" style={{ backgroundImage: 'repeating-linear-gradient(90deg, #60a5fa 0 4px, transparent 4px 7px)' }} />Humidity</span>
             <span className="flex items-center gap-2"><span className="w-4 h-2.5 rounded-sm" style={{ background: 'rgba(16,185,129,0.10)', border: '1px solid rgba(16,185,129,0.25)' }} />Comfort zone</span>
           </div>
         </div>
@@ -120,11 +115,10 @@ export function TemperaturePage() {
           </div>
         </div>
 
-        <div className="grid grid-cols-[1fr_120px_100px_80px] px-7 py-3 bg-stone-50 border-y border-stone-100/80">
+        <div className="grid grid-cols-[1fr_140px_90px] px-7 py-3 bg-stone-50 border-y border-stone-100/80">
           {[
             { label: 'Time', cls: '' },
             { label: 'Temp', cls: 'text-center' },
-            { label: 'Humidity', cls: 'text-center' },
             { label: 'Status', cls: 'text-center' },
           ].map(({ label, cls }) => (
             <span key={label} className={`text-[12px] font-bold tracking-[0.15em] uppercase text-stone-400 ${cls}`}>{label}</span>
@@ -138,7 +132,7 @@ export function TemperaturePage() {
             const trend = prev ? (log.temperature > prev.temperature ? 'up' : log.temperature < prev.temperature ? 'down' : 'flat') : 'flat'
             const time = new Date(log.created_at)
             return (
-              <div key={log.id} className="grid grid-cols-[1fr_120px_100px_80px] items-center px-7 py-4">
+              <div key={log.id} className="grid grid-cols-[1fr_140px_90px] items-center px-7 py-4">
                 <div>
                   <div className="text-[14px] font-semibold text-stone-800 leading-snug">
                     {formatTime24h(time)}
@@ -158,7 +152,6 @@ export function TemperaturePage() {
                     )}
                   </span>
                 </div>
-                <div className="text-[14px] font-medium text-blue-500 text-center tabular-nums">{log.humidity}%</div>
                 <div className="flex justify-center">
                   <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-semibold ${
                     comfort === 'good' ? 'bg-emerald-50 text-emerald-600'

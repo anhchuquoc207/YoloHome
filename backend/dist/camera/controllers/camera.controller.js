@@ -30,6 +30,7 @@ let CameraController = class CameraController {
         return this.cameraService.sendCommand(dto);
     }
     processRecognition(dto) {
+        console.log('CONTROLLER RECEIVED FACE DTO:', dto);
         return this.cameraService.processRecognition(dto);
     }
 };

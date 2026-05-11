@@ -27,6 +27,10 @@ __decorate([
     __metadata("design:type", String)
 ], LightCommand.prototype, "command", void 0);
 __decorate([
+    (0, mongoose_1.Prop)({ required: true, enum: ['manual', 'auto'], default: 'manual' }),
+    __metadata("design:type", String)
+], LightCommand.prototype, "trigger", void 0);
+__decorate([
     (0, mongoose_1.Prop)({ default: false }),
     __metadata("design:type", Boolean)
 ], LightCommand.prototype, "executed", void 0);

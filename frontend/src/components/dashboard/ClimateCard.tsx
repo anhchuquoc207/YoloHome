@@ -3,11 +3,12 @@ import { getCurrentReading } from '../../services/temperatureService'
 
 export function ClimateCard() {
   const current = useQuery({ queryKey: ['currentReading'], queryFn: getCurrentReading })
-  const humidity = current.data?.humidity ?? 65
+  const temperature = current.data?.temperature ?? 24
 
   const R = 150, sw = 11, cx = 158, cy = 158
   const halfC = Math.PI * R
-  const humidDash = (Math.min(humidity, 100) / 100) * halfC
+  const tempPercent = Math.max(0, Math.min((temperature / 40) * 100, 100))
+  const tempDash = (tempPercent / 100) * halfC
 
   return (
     <div className="h-full bg-[#f5f4f0]/60 backdrop-blur-md rounded-3xl p-6 shadow-sm shadow-stone-300/15 flex flex-col">
@@ -19,10 +20,7 @@ export function ClimateCard() {
       </div>
       <div className="flex items-center gap-3 text-xs text-stone-400 mb-2">
         <span className="flex items-center gap-1.5">
-          <span className="w-2 h-2 rounded-full bg-orange-500 inline-block" />Humidity
-        </span>
-        <span className="flex items-center gap-1.5">
-          <span className="w-2 h-2 rounded-full bg-stone-300 inline-block" />Temperature
+          <span className="w-2 h-2 rounded-full bg-orange-500 inline-block" />Temperature
         </span>
       </div>
 
@@ -35,13 +33,13 @@ export function ClimateCard() {
           <path
             d={`M ${cx - R} ${cy} A ${R} ${R} 0 0 1 ${cx + R} ${cy}`}
             fill="none" stroke="rgb(234 88 12)" strokeWidth={sw} strokeLinecap="round"
-            strokeDasharray={`${humidDash} ${halfC}`}
+            strokeDasharray={`${tempDash} ${halfC}`}
           />
           <text x={cx} y={cy - 24} textAnchor="middle" fontSize="30" fontWeight="700" fill="#1c1917" fontFamily="system-ui">
-            {humidity}%
+            {temperature} C
           </text>
           <text x={cx} y={cy - 8} textAnchor="middle" fontSize="11" fill="#a8a29e" fontFamily="system-ui">
-            Humidity
+            Current temperature
           </text>
         </svg>
       </div>

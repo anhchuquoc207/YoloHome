@@ -3,6 +3,7 @@ export interface DeviceCommand {
   device_id: number
   device_name: string
   command: 'on' | 'off'
+  trigger: 'manual' | 'auto'
   executed: boolean
   executed_at: string | null
   created_at: string

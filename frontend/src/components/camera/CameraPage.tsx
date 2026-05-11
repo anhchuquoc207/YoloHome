@@ -38,10 +38,18 @@ export function CameraPage() {
   const isActive    = camera.data?.status === 'active'
   const gateOpen    = gate.data?.status === 'open'
   const displayLogs = showAll ? logs.data : logs.data?.slice(0, 6)
-  const faceCount   = logs.data?.filter((l) => l.event === 'face_detected').length ?? 0
-  const lastFace    = logs.data?.find((l) => l.event === 'face_detected')
-  const unknownCount = logs.data?.filter((l) => l.face_label === 'Unknown').length ?? 0
+  const isUnknownFace = (label?: string | null) =>
+    label?.trim().toLowerCase() === 'unknown'
 
+  const faceLogs = logs.data?.filter((l) => l.event === 'face_detected') ?? []
+
+  const knownFaceLogs = faceLogs.filter((l) => !isUnknownFace(l.face_label))
+  const unknownFaceLogs = faceLogs.filter((l) => isUnknownFace(l.face_label))
+
+  const faceCount = knownFaceLogs.length
+  const unknownCount = unknownFaceLogs.length
+  const lastFace = faceLogs[0]
+  
   return (
     <div className="flex flex-col gap-5 animate-float-up">
 
@@ -60,7 +68,7 @@ export function CameraPage() {
       </div>
 
       {/* Hero */}
-      <div className="animate-float-up" style={{ animationDelay: '60ms' }}>
+      <div className="animate-float-up mx-auto w-full max-w-[min(100%,32rem)]" style={{ animationDelay: '60ms' }}>
         <CameraPreview
           isActive={isActive}
           name={camera.data?.name}
